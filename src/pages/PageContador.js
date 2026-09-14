@@ -2,8 +2,9 @@ import { StyleSheet, View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BotaoContador from "../componentes/BotaoContador";
 import { useState } from "react";
+import { Button } from "react-native-paper";
 
-function PageContador() {
+function PageContador({ navigation }) {
 
     const [contador, setContador] = useState(0);
 
@@ -15,6 +16,7 @@ function PageContador() {
             <Text style={styles.texto}>Contadorr</Text>
             <Text>{contador}</Text>
             <BotaoContador onPress={aumentarContador}>Aumentar Contador</BotaoContador>
+            <Button onPress={() => navigation.navigate("Tarefas")}>Lista de Tarefas</Button>
         </SafeAreaView>
     )
 }
