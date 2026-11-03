@@ -10,7 +10,7 @@ function StackNavigator() {
                 headerShown: false
             }}
         >
-            <Stack.Screen name="PrincipalTabs" component={TabsNavigator} />
+            <Stack.Screen name="TabsInicio" component={TabsNavigator} />
         </Stack.Navigator>
     )
 

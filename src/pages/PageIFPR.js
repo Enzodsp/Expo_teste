@@ -1,10 +1,8 @@
-import WebView from "react-native-webview"
+import { Text } from "react-native-paper"
 
 function PageIFPR() {
     return (
-        <WebView
-            source={{ uri: "https://www.ifpr.edu.br" }}
-        />
+        <Text>IFPR</Text>
     )
 }
 

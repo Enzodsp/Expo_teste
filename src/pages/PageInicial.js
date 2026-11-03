@@ -1,7 +1,7 @@
 import { View, StyleSheet } from 'react-native';
-import Cabecalho from "../componentes/Cabecalho";
-import CardInfo from "../componentes/CardInfo";
-import BotaoDestaque from "../componentes/BotaoDestaque";
+import Cabecalho from "../components/Cabecalho";
+import CardInfo from "../components/CardInfo";
+import BotaoDestaque from "../components/BotaoDestaque";
 
 function PageInicial() {
     return (
