@@ -7,24 +7,41 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebase-init';
 import DrawerNavigator from './src/components/DrawerNavigator';
 import LoginStackNavigator from './src/components/LoginStackNavigator';
+import { useDispatch, useSelector } from 'react-redux';
+import { setUsuarioLogado } from './src/slices/usuarioLogadoSlice';
+import useAuthService from './src/services/useAuthService';
 
 export default function App() {
 
-  const [usuario, setUsuario] = useState(null);
+  const dispatch = useDispatch();
+  const usuario = useSelector((state) => state.usuarioLogado.usuarioLogado);
   const [loading, setLoading] = useState(true);
+  const { buscarDadosUsuario } = useAuthService();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user && user.emailVerified) {
-        setUsuario(user);
+        let dadosFirestore = null;
+        try {
+          dadosFirestore = await buscarDadosUsuario(user.uid);
+        } catch (error) {
+          console.error("Erro ao buscar dados do usuário:", error);
+        }
+        dispatch(setUsuarioLogado({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          emailVerified: user.emailVerified,
+          ...(dadosFirestore || {}),
+        }));
       } else {
-        setUsuario(null);
+        dispatch(setUsuarioLogado(null));
       }
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [dispatch]);
 
   if (loading) {
     return (

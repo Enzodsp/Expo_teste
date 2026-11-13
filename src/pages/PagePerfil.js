@@ -1,21 +1,23 @@
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { ScrollView, StyleSheet, View, Alert } from "react-native";
 import { Card, Avatar, List, Button, ActivityIndicator, Text, Divider } from "react-native-paper";
-import { auth } from "../../firebase-init";
+import { useSelector, useDispatch } from "react-redux";
+import { setUsuarioLogado } from "../slices/usuarioLogadoSlice";
 import useAuthService from "../services/useAuthService";
 
 function PagePerfil() {
-    const [dados, setDados] = useState(null);
-    const [carregando, setCarregando] = useState(true);
+    const usuario = useSelector((state) => state.usuarioLogado.usuarioLogado);
+    const dispatch = useDispatch();
+    const [carregando, setCarregando] = useState(false);
     const { buscarDadosUsuario, deslogarUsuario } = useAuthService();
 
     const carregarPerfil = useCallback(async () => {
+        if (!usuario?.uid) return;
         try {
             setCarregando(true);
-            const user = auth.currentUser;
-            if (user) {
-                const dadosFirestore = await buscarDadosUsuario(user.uid);
-                setDados(dadosFirestore);
+            const dadosFirestore = await buscarDadosUsuario(usuario.uid);
+            if (dadosFirestore) {
+                dispatch(setUsuarioLogado({ ...usuario, ...dadosFirestore }));
             }
         } catch (error) {
             console.error("Erro ao carregar perfil:", error);
@@ -23,11 +25,7 @@ function PagePerfil() {
         } finally {
             setCarregando(false);
         }
-    }, []);
-
-    useEffect(() => {
-        carregarPerfil();
-    }, [carregarPerfil]);
+    }, [usuario, dispatch, buscarDadosUsuario]);
 
     async function handleLogout() {
         Alert.alert("Sair", "Deseja realmente sair da sua conta?", [
@@ -55,8 +53,8 @@ function PagePerfil() {
         );
     }
 
-    const iniciais = dados?.nome
-        ? dados.nome.trim().split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()
+    const iniciais = usuario?.nome
+        ? usuario.nome.trim().split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()
         : "U";
 
     return (
@@ -65,10 +63,10 @@ function PagePerfil() {
                 <View style={styles.avatarContainer}>
                     <Avatar.Text size={72} label={iniciais} />
                     <Text variant="titleLarge" style={styles.userName}>
-                        {dados?.nome || auth.currentUser?.displayName || "Usuário"}
+                        {usuario?.nome || usuario?.displayName || "Usuário"}
                     </Text>
                     <Text variant="bodyMedium" style={styles.userEmail}>
-                        {auth.currentUser?.email}
+                        {usuario?.email}
                     </Text>
                 </View>
 
@@ -78,27 +76,27 @@ function PagePerfil() {
                     <List.Section title="Informações Pessoais">
                         <List.Item
                             title="Nome Completo"
-                            description={dados?.nome || "Não informado"}
+                            description={usuario?.nome || "Não informado"}
                             left={(props) => <List.Icon {...props} icon="account" />}
                         />
                         <List.Item
                             title="E-mail"
-                            description={dados?.email || auth.currentUser?.email || "Não informado"}
+                            description={usuario?.email || "Não informado"}
                             left={(props) => <List.Icon {...props} icon="email" />}
                         />
                         <List.Item
                             title="Telefone"
-                            description={dados?.telefone || "Não informado"}
+                            description={usuario?.telefone || "Não informado"}
                             left={(props) => <List.Icon {...props} icon="phone" />}
                         />
                         <List.Item
                             title="ID do Usuário (UID)"
-                            description={auth.currentUser?.uid || "N/A"}
+                            description={usuario?.uid || "N/A"}
                             left={(props) => <List.Icon {...props} icon="identifier" />}
                         />
                         <List.Item
                             title="Status do E-mail"
-                            description={auth.currentUser?.emailVerified ? "Verificado ✅" : "Pendente ⚠️"}
+                            description={usuario?.emailVerified ? "Verificado ✅" : "Pendente ⚠️"}
                             left={(props) => <List.Icon {...props} icon="check-decagram" />}
                         />
                     </List.Section>

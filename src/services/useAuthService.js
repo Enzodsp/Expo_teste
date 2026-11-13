@@ -14,12 +14,18 @@ export function useAuthService() {
     const cadastrarEmailSenha = async (dadosUsuario) => {
         let userCredential = null;
         try {
-            const { email, senha, nome, telefone } = dadosUsuario;
+            const email = dadosUsuario.getEmail ? dadosUsuario.getEmail() : dadosUsuario.email;
+            const senha = dadosUsuario.getSenha ? dadosUsuario.getSenha() : dadosUsuario.senha;
+            const nome = dadosUsuario.getNome ? dadosUsuario.getNome() : dadosUsuario.nome;
+            const telefone = dadosUsuario.getTelefone ? dadosUsuario.getTelefone() : dadosUsuario.telefone;
+            const endereco = dadosUsuario.getEndereco ? dadosUsuario.getEndereco() : dadosUsuario.endereco;
+
             userCredential = await createUserWithEmailAndPassword(auth, email, senha);
             const novoUsuario = new Usuario({
                 nome: nome || '',
                 email: email || '',
                 telefone: telefone || '',
+                endereco: endereco || null,
             });
             const userRef = doc(db, 'Usuarios', userCredential.user.uid).withConverter(usuarioConverter);
             await setDoc(userRef, novoUsuario);
@@ -73,6 +79,7 @@ export function useAuthService() {
                     nome: usuario.getNome ? usuario.getNome() : usuario.nome,
                     email: usuario.getEmail ? usuario.getEmail() : usuario.email,
                     telefone: usuario.getTelefone ? usuario.getTelefone() : usuario.telefone,
+                    endereco: usuario.getEndereco ? usuario.getEndereco() : usuario.endereco,
                 };
             }
             return null;

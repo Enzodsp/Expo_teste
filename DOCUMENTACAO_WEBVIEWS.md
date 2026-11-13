@@ -1,5 +1,6 @@
 # Documentação: Segurança com WebViews
 
+
 ## Referências Consultadas
 
 1. **Documentação Oficial do `react-native-webview`:**  
@@ -9,4 +10,5 @@
    https://docs.expo.dev/versions/latest/sdk/webview/
 3. **Android Developers - Manage WebViews securely:**  
    https://developer.android.com/privacy-and-security/risks/webview-security
+
 

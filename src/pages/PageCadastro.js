@@ -1,30 +1,48 @@
 import { ScrollView, StyleSheet, Alert } from "react-native";
-import { Button, Card, Text, TextInput } from "react-native-paper";
+import { Button, Card, Text, TextInput, Divider } from "react-native-paper";
 import { useState } from "react";
 import useAuthService from "../services/useAuthService";
 import { useNavigation } from "@react-navigation/native";
+import Usuario from "../models/Usuario";
+import { Endereco } from "../models/Endereco";
 
 function PageCadastro() {
-    const [usuario, setUsuario] = useState({
-        nome: '',
-        email: '',
-        telefone: '',
-        senha: ''
-    });
+    const [usuario, setUsuario] = useState(new Usuario());
+    const [endereco, setEndereco] = useState(new Endereco());
     const [secureText, setSecureText] = useState(true);
     const [loading, setLoading] = useState(false);
     const { cadastrarEmailSenha } = useAuthService();
     const navigation = useNavigation();
 
+    function handleOnChangeTextUsuario(campo, texto) {
+        const novoUsuario = new Usuario({
+            ...usuario,
+            [campo]: texto
+        });
+        setUsuario(novoUsuario);
+    }
+
+    function handleOnChangeTextEndereco(campo, texto) {
+        const novoEndereco = new Endereco({
+            ...endereco,
+            [campo]: texto
+        });
+        setEndereco(novoEndereco);
+    }
+
     async function cadastrarUsuario() {
-        if (!usuario.nome || !usuario.email || !usuario.senha || !usuario.telefone) {
-            Alert.alert("Atenção", "Por favor, preencha todos os campos obrigatórios.");
+        if (!usuario.getNome() || !usuario.getEmail() || !usuario.getSenha() || !usuario.getTelefone()) {
+            Alert.alert("Atenção", "Por favor, preencha todos os campos obrigatórios (*).");
             return;
         }
 
         try {
             setLoading(true);
-            await cadastrarEmailSenha(usuario);
+            const usuarioCompleto = new Usuario({
+                ...usuario,
+                endereco: endereco
+            });
+            await cadastrarEmailSenha(usuarioCompleto);
             Alert.alert(
                 "Cadastro Realizado!",
                 "Um e-mail de verificação foi enviado. Por favor, confirme seu e-mail antes de realizar o login.",
@@ -54,8 +72,8 @@ function PageCadastro() {
                     <TextInput
                         label="Nome Completo *"
                         placeholder="Insira seu nome completo"
-                        value={usuario.nome}
-                        onChangeText={(text) => setUsuario({ ...usuario, nome: text })}
+                        value={usuario.getNome()}
+                        onChangeText={(text) => handleOnChangeTextUsuario("nome", text)}
                         style={styles.input}
                         mode="outlined"
                     />
@@ -64,8 +82,8 @@ function PageCadastro() {
                         placeholder="seuemail@exemplo.com"
                         keyboardType="email-address"
                         autoCapitalize="none"
-                        value={usuario.email}
-                        onChangeText={(text) => setUsuario({ ...usuario, email: text })}
+                        value={usuario.getEmail()}
+                        onChangeText={(text) => handleOnChangeTextUsuario("email", text)}
                         style={styles.input}
                         mode="outlined"
                     />
@@ -73,17 +91,17 @@ function PageCadastro() {
                         label="Telefone *"
                         placeholder="(44) 99999-9999"
                         keyboardType="phone-pad"
-                        value={usuario.telefone}
-                        onChangeText={(text) => setUsuario({ ...usuario, telefone: text })}
+                        value={usuario.getTelefone()}
+                        onChangeText={(text) => handleOnChangeTextUsuario("telefone", text)}
                         style={styles.input}
                         mode="outlined"
                     />
                     <TextInput
                         label="Senha *"
                         placeholder="Mínimo 6 caracteres"
-                        value={usuario.senha}
+                        value={usuario.getSenha()}
                         secureTextEntry={secureText}
-                        onChangeText={(text) => setUsuario({ ...usuario, senha: text })}
+                        onChangeText={(text) => handleOnChangeTextUsuario("senha", text)}
                         style={styles.input}
                         mode="outlined"
                         right={
@@ -93,6 +111,37 @@ function PageCadastro() {
                             />
                         }
                     />
+
+                    <Divider style={styles.divider} />
+                    <Text variant="titleSmall" style={styles.sectionTitle}>Endereço (opcional)</Text>
+
+                    <TextInput
+                        label="CEP"
+                        placeholder="00000-000"
+                        keyboardType="numeric"
+                        value={endereco.getCep() || ""}
+                        onChangeText={(text) => handleOnChangeTextEndereco("cep", text)}
+                        style={styles.input}
+                        mode="outlined"
+                    />
+                    <TextInput
+                        label="Logradouro"
+                        placeholder="Rua, Avenida, etc."
+                        value={endereco.getLogradouro() || ""}
+                        onChangeText={(text) => handleOnChangeTextEndereco("logradouro", text)}
+                        style={styles.input}
+                        mode="outlined"
+                    />
+                    <TextInput
+                        label="Número"
+                        placeholder="Ex: 123"
+                        keyboardType="numeric"
+                        value={endereco.getNumero() || ""}
+                        onChangeText={(text) => handleOnChangeTextEndereco("numero", text)}
+                        style={styles.input}
+                        mode="outlined"
+                    />
+
                     <Button
                         mode="contained"
                         loading={loading}
@@ -126,6 +175,13 @@ const styles = StyleSheet.create({
     },
     input: {
         marginBottom: 12,
+    },
+    divider: {
+        marginVertical: 12,
+    },
+    sectionTitle: {
+        marginBottom: 12,
+        fontWeight: 'bold',
     },
     button: {
         marginTop: 8,
